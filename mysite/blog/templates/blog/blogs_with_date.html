@@ -1,0 +1,24 @@
+{% extends "blog/blog_list.html" %}
+
+{% block title %}
+    {{ blog_type.type_name }}
+{% endblock %}
+
+{% block blog_list_title %}
+    日期归档：{{ blogs_with_date }}
+{% endblock blog_list_title %}
+
+
+{% comment %}
+{% block content %}
+    <h3>{{ blog_type.type_name }}</h3>
+    <p>一共{{ blogs|length }}篇博客</p>
+    {% for blog in blogs %}
+        <a href="{% url 'blog_detail' blog.pk %}">
+        <h3>{{ blog.title }}</h3></a>
+        <p>{{ blog.content|truncatechars:30 }}</p>
+    {% empty %}
+        <p>暂无博客敬请期待</p>
+    {% endfor %}
+{% endblock content %}} 
+{% endcomment %}

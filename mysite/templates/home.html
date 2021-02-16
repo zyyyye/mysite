@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    My Home
+{% endblock title %}
+
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'home.css' %}">
+{% endblock header_extends %}
+
+{% block content %}
+    <h3 class="home-content">Welcome to My first website</h3>
+{% endblock content %}
