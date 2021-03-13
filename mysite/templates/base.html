@@ -28,9 +28,80 @@
                     <li><a href="{% url 'home' %}">home</a></li>
                     <li><a href="{% url 'blog_list' %}">blog</a></li>
                 </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if not user.is_authenticated %}
+                        <li><a href="{% url 'login' %}?from={{request.get_full_path}}">登陆</a></li>
+                        <li><a href="{% url 'register' %}?from={{request.get_full_path}}">注册</a></li>
+                    {% else %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+                                {% if user.has_nickname %}
+                                {{user.username}}({{ user.get_nickname }}) 
+                                {% else %}
+                                {{user.username}}
+                                {% endif %}
+                                <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                <li><a href="{% url 'user_info' %}">个人资料</a></li>
+                                {% if user.is_staff or user.is_superuser %}
+                                <li><a href="{% url 'admin:index' %}">后台管理</a></li>
+                                {% endif %}
+                                <li><a href="{% url 'logout' %}?from={{request.get_full_path}}">退出</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                  </ul>
             </div>
         </div>
     </div>
     {% block content %}{% endblock %}
+
+<!-- Modal -->
+    <div class="modal fade" id="login_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <form id="login_modal_form" action=" " method="post">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">登陆</h4>
+                </div>
+                <div class="modal-body">
+                        {% csrf_token %}
+                        {% for field in login_modal_form %}
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                        {% endfor %}
+                        <span id="login_modal_tip" class="pull-left text-danger"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="submit" class="btn btn-primary">登陆</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+    <script type="text/javascript"> 
+        $("#login_modal_form").submit(function(event){
+            event.preventDefault();
+            console.log('1')
+
+            $.ajax({
+               url: '{% url "login_for_modal" %}',
+               type: 'POST',
+               data: $(this).serialize(),
+               cache: false,
+               success: function(data){
+                    if(data['status'] == 'SUCCESS'){
+                        window.location.reload();
+                    }else{
+                        $('#login_modal_tip').text('用户名或密码不正确');
+                    }
+               } 
+            });
+        });
+    </script>
+
+    {% block script_extends %}{% endblock %}
 </body>
 </html>

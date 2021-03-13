@@ -5,3 +5,7 @@
 body{
     margin-top: 50px !important;
 }
+
+ul.navbar-right{
+    margin-right: 0;
+}

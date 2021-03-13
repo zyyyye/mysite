@@ -2,7 +2,10 @@ from django.shortcuts import render,get_object_or_404
 from django.core.paginator import Paginator
 from .models import Blog, BlogType
 from django.db.models import Count
+from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
+from read_statistics.utils import read_statistic_once_read
+
 
 def get_blog_list_common_data(request,blogs_all_list):
     page_num = request.GET.get('page',1)
@@ -42,12 +45,18 @@ def blog_list(request):
     return render(request, 'blog/blog_list.html',context)
 
 def blog_detail(request, blog_pk):
-    context = {}
     blog = get_object_or_404(Blog,pk=blog_pk)
+    key = read_statistic_once_read(request,blog)
+    blog_content_type = ContentType.objects.get_for_model(blog)
+
+    context = {}
     context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
     context['next_blog'] = Blog.objects.filter(created_time__lt=blog.created_time).first()
     context['blog'] = blog
-    return render(request, 'blog/blog_detail.html',context)
+
+    response = render(request, 'blog/blog_detail.html',context)
+    response.set_cookie(key, 'true')
+    return response
 
 def blogs_with_type(request, blogs_type_pk):
     blog_type = get_object_or_404(BlogType, pk=blogs_type_pk)

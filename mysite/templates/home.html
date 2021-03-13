@@ -7,8 +7,80 @@
 
 {% block header_extends %}
     <link rel="stylesheet" href="{% static 'home.css' %}">
+    <script src="http://cdn.highcharts.com.cn/highcharts/highcharts.js"></script>
 {% endblock header_extends %}
 
 {% block content %}
     <h3 class="home-content">Welcome to My first website</h3>
+    <!-- 图表容器 DOM -->
+    <div id="container"></div>
+    <!-- 热门博客 DOM -->
+    <div class="hot-data">
+        <h4>今日热门点击</h3>
+        <ul>
+            {% for hot_data in today_hot_data %}
+            <li>
+                <a href="{% url 'blog_detail' hot_data.content_object.pk %}">{{ hot_data.content_object.title }}({{ hot_data.read_num }})</a>
+            </li>
+            {% empty %}
+            <li>no_data</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="hot-data">
+        <h4>昨日热门点击</h3>
+        <ul>
+            {% for hot_data in yesterday_hot_data %}
+            <li>
+                <a href="{% url 'blog_detail' hot_data.content_object.pk %}">{{ hot_data.content_object.title }}({{ hot_data.read_num }})</a>
+            </li>
+            {% empty %}
+            <li>no_data</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="hot-data">
+        <h4>7日热门点击</h3>
+        <ul>
+            {% for hot_data in seven_days_hot_data %}
+            <li>
+                <a href="{% url 'blog_detail' hot_data.id %}">{{ hot_data.title }}({{ hot_data.read_num_sum }})</a>
+            </li>
+            {% empty %}
+            <li>no_data</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        // 图表配置
+        var options = {
+            chart: {type: 'line' },
+            title: {text: null},
+            xAxis: {
+                categories: {{dates|safe}},
+                tickmarkPlacement:'on'
+            },
+            yAxis: {
+                title: { text: null },               // y 轴标题
+                labels:{ enable:false },
+                gridLineDashStyle: 'Dash',
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    }
+                }
+            },
+            series: [{                              // 数据列
+                name: 'read_num',                        // 数据列名
+                data: {{ read_nums }}                     // 数据
+            }],
+            legend:{ enabled:false },
+            credits:{enabled:false },
+        };
+        // 图表初始化函数
+        var chart = Highcharts.chart('container', options);
+    </script>
 {% endblock content %}

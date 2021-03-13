@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    Errror
+{% endblock title %}
+
+{% block header_extends %}
+
+{% endblock header_extends %}
+
+{% block content %}
+    {{ message }},<a href="{{ redirect_to }}">返回</a>
+{% endblock content %}
