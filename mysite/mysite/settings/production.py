@@ -50,8 +50,8 @@ EMAIL_HOST_USER = 'zyyyye@qq.com'
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
 EMAIL_SUBJECT_PREFIX = '[my_blog]'
 EMAIL_USE_SSL = True
-
-ADMIN = (
+'''
+ADMINS = (
     {'admin','zyyyye@qq.com'},
 )
 
@@ -78,3 +78,4 @@ LOGGING = {
         },
     },
 }
+'''
