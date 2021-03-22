@@ -19,6 +19,8 @@
                     <li>邮箱:{% if user.email %}{{ user.email }}{% else %}未<a href="{% url 'bind_email' %}?from={{ request.get_full_path }}">绑定</a>{% endif %}</li>
                     <li>最后登陆时间:{{ user.last_login|date:"Y-m-d H:i:s" }}</li>
                     <li><a href="{% url 'change_password' %}">修改密码</a></li>
+                    <li><a href="{% url 'edit_blogs_list' user %}">编辑我的博客</a></li>
+                    <li><a href="{% url 'create_blog'%}">写</a></li>
                 </ul>
                 {% else %}
                 <span>未登录，跳转到首页...</span>

@@ -86,6 +86,26 @@
             </div>
             <div class="hidden-xs col-sm-4 col-md-4 col-lg-2">
                 <div class="panel panel-default">
+                    <div class="panel-heading">作者列表</div>
+                    <div class="panel-body">
+                        <ul class="blog-type">
+                            {% for author in authors %}
+                                {% if author.blog_count  %}
+                                <li>
+                                    <a href="{% url 'blogs_with_author' author %}">
+                                        {{ author }} ({{ author.blog_count }})
+                                    </a>
+                                </li>
+                                {%endif%}
+                            {% empty %}
+                                <li>
+                                    暂无分类
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="panel panel-default">
                     <div class="panel-heading">博客分类</div>
                     <div class="panel-body">
                         <ul class="blog-type">

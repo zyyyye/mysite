@@ -1,10 +1,13 @@
-from django.shortcuts import render,get_object_or_404
+from django.shortcuts import render,get_object_or_404, redirect
 from django.core.paginator import Paginator
 from .models import Blog, BlogType
 from django.db.models import Count
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from read_statistics.utils import read_statistic_once_read
+from django.contrib.auth.models import User
+from .forms import EditBlogForm
+from django.urls import reverse
 
 
 def get_blog_list_common_data(request,blogs_all_list):
@@ -31,12 +34,12 @@ def get_blog_list_common_data(request,blogs_all_list):
 
 
     context = {}
-    #context['blogs'] = page_of_blogs.object_list
     context['page_of_blogs'] = page_of_blogs
     context['count'] = blogs_all_list.count
     context['blog_types'] = BlogType.objects.annotate(blog_count = Count('blog'))
     context['page_range'] = page_range
     context['blog_dates'] = blog_dates_dict
+    context['authors'] = User.objects.annotate(blog_count = Count('blog'))
     return context
 
 def blog_list(request):
@@ -70,3 +73,68 @@ def blogs_with_date(request, year, month):
     context = get_blog_list_common_data(request,blogs_all)
     context['blogs_with_date'] = '%s年%s月' % (year,month)
     return render(request, 'blog/blogs_with_date.html', context)
+
+def blogs_with_author(request, author):
+    author = User.objects.filter(username = author)[0]
+    blogs_all = Blog.objects.filter(author = author)
+    context = get_blog_list_common_data(request,blogs_all)
+    context['blogs_with_author'] = author
+    return render(request, 'blog/blogs_with_author.html', context)
+
+def edit_blogs_list(request, author):
+    author = User.objects.filter(username = author)[0]
+    blogs_all = Blog.objects.filter(author = author)
+    context = get_blog_list_common_data(request,blogs_all)
+    context['blogs_with_author'] = author
+    return render(request, 'blog/edit_blogs_list.html', context)
+    
+def edit_blog(request, blog_pk):
+    print(request)
+    context = {}
+    try:
+        blog = Blog.objects.get(pk = blog_pk)
+    except Blog.DoesNotExist:
+        form_data = {
+            'object_id' : blog_pk,
+        }
+    else:
+        form_data = {
+            'object_id': blog_pk,
+            'content' : blog.content,
+            'title': blog.title,
+            'blog_type': blog.blog_type,
+        }
+        context['blog'] = blog
+    form = EditBlogForm(initial=form_data)
+        # form.fields['blog_type'].initial = {str(blog.blog_type):blog.blog_type}
+        # form.fields['title'].initial = blog.title
+
+    context['edit_blog_form'] = form
+    response = render(request, 'blog/edit_blog.html',context)
+    return response
+
+def update_blog(request):
+    referer = request.META.get('HTTP_REFERER', reverse('home'))
+    edit_blog_form = EditBlogForm(request.POST, user = request.user)
+    data = {}
+    if edit_blog_form.is_valid():
+        blog_id = edit_blog_form.cleaned_data['object_id']     
+        try:
+            blog = Blog.objects.get(pk = blog_id)
+        except Blog.DoesNotExist:
+            blog = Blog()
+            blog.author = request.user
+        blog.title = edit_blog_form.cleaned_data['title'] 
+        blog.content = edit_blog_form.cleaned_data['content']
+        blog.blog_type = BlogType.objects.filter(type_name = edit_blog_form.cleaned_data['blog_type']).first()
+        blog.save()
+    else:
+        print(edit_blog_form.errors)
+    return edit_blogs_list(request, request.user)
+
+def create_blog(request):
+    print(request)
+    new_id = Blog.objects.first().id + 1
+    return edit_blog(request,new_id)
+
+    
